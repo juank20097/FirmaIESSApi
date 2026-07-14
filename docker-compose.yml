@@ -1,5 +1,5 @@
 # ============================================================
-#  base-spring-api - Docker Compose de la aplicacion
+#  transversal-firmaec-api - Docker Compose de la aplicacion
 #  Autor: Juan Carlos Estevez Hidalgo
 #  Fecha: 07 may 2026
 #
@@ -20,32 +20,32 @@
 
 services:
 
-  svc-base-spring-api:
+  svc-transversal-firmaec-api:
     build:
       context: .
       dockerfile: Dockerfile
-    image: base-spring-api:1.0.0
-    container_name: ctn-base-spring-api
+    image: transversal-firmaec-api:2.0.0
+    container_name: ctn-transversal-firmaec-api
     restart: unless-stopped
     env_file:
       - .env
     environment:
       SPRING_PROFILES_ACTIVE: postgres,mongo
     ports:
-      - "8080:8080"
+      - "8090:8090"
     volumes:
       - app_uploads:/app/uploads
     networks:
       - net-iess
     labels:
       iess.type: app
-      iess.project: base-spring-api
+      iess.project: transversal-firmaec-api
       iess.business: DNTI
       iess.domain: transversal
-      iess.version: "1.0.0"
+      iess.version: "2.0.0"
       iess.environment: dev
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/actuator/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:8090/api/actuator/health"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -60,4 +60,4 @@ networks:
 # ── Volumenes persistentes ───────────────────────────────────
 volumes:
   app_uploads:
-    name: vol-base-spring-api-uploads
+    name: vol-transversal-firmaec-api-uploads

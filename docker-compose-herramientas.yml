@@ -69,7 +69,7 @@ services:
       - net-iess
     labels:
       iess.type: plataforma
-      iess.project: base-spring-api
+      iess.project: transversal-firmaec-api
       iess.business: DNTI
       iess.domain: transversal
       iess.version: "7"
@@ -81,55 +81,55 @@ services:
       retries: 5
 
   # ── HashiCorp Vault ──────────────────────────────────────────
-  svc-vault:
-    image: hashicorp/vault:1.15
-    container_name: ctn-vault
-    restart: unless-stopped
-    environment:
-      VAULT_DEV_ROOT_TOKEN_ID: root-token
-      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
-      VAULT_ADDR: "http://0.0.0.0:8200"
-    ports:
-      - "8200:8200"
-    cap_add:
-      - IPC_LOCK
-    command: server -dev
-    networks:
-      - net-iess
-    labels:
-      iess.type: plataforma
-      iess.project: base-spring-api
-      iess.business: DNTI
-      iess.domain: transversal
-      iess.version: "1.15"
-      iess.environment: dev
-    healthcheck:
-      test: ["CMD", "vault", "status"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+#  svc-vault:
+#    image: hashicorp/vault:1.15
+#    container_name: ctn-vault
+#    restart: unless-stopped
+#    environment:
+#      VAULT_DEV_ROOT_TOKEN_ID: root-token
+#      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+#      VAULT_ADDR: "http://0.0.0.0:8200"
+#    ports:
+#      - "8200:8200"
+#    cap_add:
+#      - IPC_LOCK
+#    command: server -dev
+#    networks:
+#      - net-iess
+#    labels:
+#      iess.type: plataforma
+#      iess.project: base-spring-api
+#      iess.business: DNTI
+#      iess.domain: transversal
+#      iess.version: "1.15"
+#      iess.environment: dev
+#    healthcheck:
+#      test: ["CMD", "vault", "status"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
 
   # ── Vault Init ───────────────────────────────────────────────
   # Ejecuta vault-init.sh al levantar el ecosistema.
   # Para modificar secretos editar vault-init.sh y reejecutar:
   #   docker-compose -f docker-compose-utilitarios.yml up vault-init
-  svc-vault-init:
-    image: hashicorp/vault:1.15
-    container_name: ctn-vault-init
-    restart: "no"
-    environment:
-      VAULT_ADDR: "http://svc-vault:8200"
-      VAULT_TOKEN: "root-token"
-      IP_SERVER: ${IP_SERVER:-}
-      VAULT_INIT_ENABLED: ${VAULT_INIT_ENABLED:-true}
-    depends_on:
-      svc-vault:
-        condition: service_healthy
-    networks:
-      - net-iess
-    volumes:
-      - ./vault-init.sh:/vault-init.sh
-    entrypoint: ["sh", "/vault-init.sh"]
+#  svc-vault-init:
+#    image: hashicorp/vault:1.15
+#    container_name: ctn-vault-init
+#    restart: "no"
+#    environment:
+#      VAULT_ADDR: "http://svc-vault:8200"
+#      VAULT_TOKEN: "root-token"
+#      IP_SERVER: ${IP_SERVER:-}
+#      VAULT_INIT_ENABLED: ${VAULT_INIT_ENABLED:-true}
+#    depends_on:
+#      svc-vault:
+#        condition: service_healthy
+#    networks:
+#      - net-iess
+#    volumes:
+#      - ./vault-init.sh:/vault-init.sh
+#    entrypoint: ["sh", "/vault-init.sh"]
 
   # ── MinIO ────────────────────────────────────────────────────
   svc-minio:
@@ -149,7 +149,7 @@ services:
       - net-iess
     labels:
       iess.type: plataforma
-      iess.project: base-spring-api
+      iess.project: transversal-firmaec-api
       iess.business: DNTI
       iess.domain: transversal
       iess.version: "2024-11-07"
@@ -172,6 +172,6 @@ volumes:
 #  postgres_data:
 #    name: vol-postgres-base-spring-api
   mongo_data:
-    name: vol-mongo-base-spring-api
+    name: vol-mongo-transversal-firmaec-api
   minio_data:
-    name: vol-minio-base-spring-api
+    name: vol-minio-transversal-firmaec-api
