@@ -51,33 +51,33 @@ services:
 #      retries: 5
 
   # ── MongoDB ──────────────────────────────────────────────────
-#  svc-mongo-auditoria:
-#    image: mongo:7-jammy
-#    container_name: ctn-mongo-auditoria
-#    restart: unless-stopped
-#    environment:
-#      MONGO_INITDB_ROOT_USERNAME: mongo_user
-#      MONGO_INITDB_ROOT_PASSWORD: mongo_password
-#      MONGO_INITDB_DATABASE: auditoria_iess_db
-#    ports:
-#      - "27017:27017"
-#    volumes:
-#      - mongo_data:/data/db
-#    command: mongod --quiet --logpath /dev/null
-#    networks:
-#      - net-iess
-#    labels:
-#      iess.type: plataforma
-#      iess.project: transversal-firmaec-api
-#      iess.business: DNTI
-#      iess.domain: transversal
-#      iess.version: "7"
-#      iess.environment: dev
-#    healthcheck:
-#      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 5
+  svc-mongo-auditoria:
+    image: mongo:7-jammy
+    container_name: ctn-mongo-auditoria
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo_user
+      MONGO_INITDB_ROOT_PASSWORD: mongo_password
+      MONGO_INITDB_DATABASE: auditoria_iess_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    command: mongod --quiet --logpath /dev/null
+    networks:
+      - net-iess
+    labels:
+      iess.type: plataforma
+      iess.project: transversal-firmaec-api
+      iess.business: DNTI
+      iess.domain: transversal
+      iess.version: "7"
+      iess.environment: dev
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # ── HashiCorp Vault ──────────────────────────────────────────
 #  svc-vault:
@@ -170,7 +170,7 @@ networks:
 volumes:
 #  postgres_data:
 #    name: vol-postgres-transversal-firmaec-api
-#  mongo_data:
-#    name: vol-mongo-transversal-firmaec-api
+  mongo_data:
+    name: vol-mongo-transversal-firmaec-api
   minio_data:
     name: vol-minio-transversal-firmaec-api
