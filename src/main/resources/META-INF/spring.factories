@@ -1,0 +1,2 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+  ec.gob.iess.transversal.FirmaIessApi.infrastructure.config.VaultEnvironmentPostProcessor

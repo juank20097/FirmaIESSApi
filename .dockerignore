@@ -1,0 +1,42 @@
+# ============================================================
+#  .dockerignore - BaseSpringApi
+#  Excluye archivos innecesarios del contexto de Docker
+# ============================================================
+
+# IDE
+.settings/
+.classpath
+.project
+*.launch
+
+# Maven
+target/
+!target/BaseSpringApi-0.0.1-SNAPSHOT.jar
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Backups generados durante refactoring
+*.bak
+
+# Archivos de entorno locales
+.env
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Documentación
+HELP.md
+README.md
+javadoc/
+package-info-backup/
+
+# Uploads locales
+uploads/
+
+# Logs
+*.log

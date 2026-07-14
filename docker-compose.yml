@@ -1,0 +1,63 @@
+# ============================================================
+#  base-spring-api - Docker Compose de la aplicacion
+#  Autor: Juan Carlos Estevez Hidalgo
+#  Fecha: 07 may 2026
+#
+#  Nombrado segun PAS-EST-059: servicios svc-, contenedores ctn-,
+#  redes net-, labels iess.* obligatorios.
+#
+#  PREREQUISITO: El ecosistema de utilitarios debe estar
+#  corriendo antes de levantar este archivo:
+#    docker-compose -f docker-compose-utilitarios.yml up -d
+#
+#  Uso:
+#    Construir y levantar: docker-compose up -d --build
+#    Solo levantar:        docker-compose up -d
+#    Ver logs:             docker-compose logs -f
+#    Detener:              docker-compose down
+#    Reconstruir imagen:   docker-compose build --no-cache
+# ============================================================
+
+services:
+
+  svc-base-spring-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: base-spring-api:1.0.0
+    container_name: ctn-base-spring-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres,mongo
+    ports:
+      - "8080:8080"
+    volumes:
+      - app_uploads:/app/uploads
+    networks:
+      - net-iess
+    labels:
+      iess.type: app
+      iess.project: base-spring-api
+      iess.business: DNTI
+      iess.domain: transversal
+      iess.version: "1.0.0"
+      iess.environment: dev
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+# ── Red compartida con utilitarios ───────────────────────────
+networks:
+  net-iess:
+    external: true
+    name: net-iess
+
+# ── Volumenes persistentes ───────────────────────────────────
+volumes:
+  app_uploads:
+    name: vol-base-spring-api-uploads

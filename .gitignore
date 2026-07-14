@@ -1,0 +1,70 @@
+# ============================================================
+#  .gitignore - FirmaIessApi
+#  Autor: Juan Carlos Estévez Hidalgo
+# ============================================================
+
+# ── Maven ────────────────────────────────────────────────────
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ── Variables de entorno (contienen credenciales) ────────────
+.env
+.env.dev
+vault-init.sh
+
+# ── archivos de construcción ────────────
+rename-project.bat
+rename-project.sh
+
+# ── Eclipse ──────────────────────────────────────────────────
+.classpath
+.project
+.settings/
+.factorypath
+.apt_generated
+.springBeans
+.sts4-cache
+
+# ── IntelliJ IDEA ────────────────────────────────────────────
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# ── NetBeans ─────────────────────────────────────────────────
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ── VS Code ──────────────────────────────────────────────────
+.vscode/
+
+# ── Javadoc generado ─────────────────────────────────────────
+doc/
+
+# ── Documentacion de puesta en produccion (local) ────────────
+doc_paso/
+
+# ── Archivos de backup generados durante refactoring ─────────
+*.bak
+package-info-backup/
+
+# ── Uploads locales ──────────────────────────────────────────
+uploads/
+
+# ── Logs ─────────────────────────────────────────────────────
+*.log
+
+# ── OS ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── HELP generado por Spring Initializr ──────────────────────
+HELP.md

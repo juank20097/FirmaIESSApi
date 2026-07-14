@@ -1,0 +1,171 @@
+# ============================================================
+#  base-spring-api - Configuración principal
+#  Todas las propiedades sensibles se leen desde .env
+#
+#  Switch de motor relacional:
+#    DB_ENGINE=postgres  -> activa perfil "postgres"
+#    DB_ENGINE=oracle    -> activa perfil "oracle"
+#
+#  Flags de servicios opcionales (true/false en .env):
+#    MONGO_ENABLED  → auditoría MongoDB
+#    VAULT_ENABLED  → HashiCorp Vault
+#    MINIO_ENABLED  → almacenamiento de objetos MinIO
+# ============================================================
+
+server:
+  port: ${SERVER_PORT}
+  servlet:
+    context-path: ${SERVER_CONTEXT_PATH}
+  forward-headers-strategy: framework
+
+
+spring:
+  devtools:
+    restart:
+      enabled: false
+    livereload:
+      enabled: false
+  application:
+    name: base-spring-api
+
+  # --- Activación automática del perfil según DB_ENGINE ------
+  profiles:
+    active: ${DB_ENGINE}
+
+  # --- MongoDB (auditoría) -----------------------------------
+  # La autoconfiguración de Mongo se gestiona condicionalmente
+  # desde MongoConfig cuando MONGO_ENABLED=true
+  autoconfigure:
+    exclude:
+      - org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientAutoConfiguration
+      - org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+
+
+# --- MinIO ---------------------------------------------------
+minio:
+  enabled: ${MINIO_ENABLED:false}
+  url: ${MINIO_URL:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+  bucket-default: ${MINIO_BUCKET_DEFAULT:base-spring-bucket}
+
+# --- RSA (cifrado de campos sensibles: cedula, correo) --------
+rsa:
+  enabled: ${RSA_ENABLED:false}
+  public-key: ${RSA_PUBLIC_KEY:}
+  private-key: ${RSA_PRIVATE_KEY:}
+
+# --- Almacenamiento local ------------------------------------
+storage:
+  local:
+    path: ${STORAGE_LOCAL_PATH:uploads}
+
+# --- Actuator ------------------------------------------------
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${ACTUATOR_EXPOSURE:health,info}
+  endpoint:
+    health:
+      show-details: always
+
+# --- Swagger / OpenAPI ---------------------------------------
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:true}
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:true}
+    path: /swagger-ui.html
+  info:
+    title: ${SWAGGER_TITLE:FirmaIessApi}
+    description: ${SWAGGER_DESCRIPTION:API REST base con Spring Boot 3}
+    version: ${SWAGGER_VERSION:1.0.0}
+
+# --- FirmaDigital ---------------------------------------------
+firmadigital:
+  url:                  ${FIRMADIGITAL_URL}
+  sistema:              ${FIRMADIGITAL_SISTEMA}
+  apikey:               ${FIRMADIGITAL_APIKEY}
+  version:              ${FIRMADIGITAL_VERSION}
+  razon:                ${FIRMADIGITAL_RAZON}
+  max-documentos:       ${FIRMADIGITAL_MAX_DOCUMENTOS:10}
+  url-expiracion-horas: ${FIRMADIGITAL_URL_EXPIRACION_HORAS:24}
+  zip-nombre:           ${FIRMADIGITAL_ZIP_NOMBRE:documentos_firmados_iess}
+
+# --- Logging ------------------------------------------------
+logging:
+  level:
+    ec.gob.iess.transversal.FirmaIessApi: INFO
+
+---
+#  Activo cuando DB_ENGINE=postgres
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: postgres
+
+  datasource:
+    url: jdbc:postgresql://${DB_POSTGRES_HOST}:${DB_POSTGRES_PORT}/${DB_POSTGRES_NAME}?currentSchema=${DB_POSTGRES_SCHEMA}
+    username: ${DB_POSTGRES_USERNAME}
+    password: ${DB_POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: ${DB_POSTGRES_DDL_AUTO}
+    show-sql: ${DB_POSTGRES_SHOW_SQL}
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: ${DB_POSTGRES_SCHEMA:public}
+    open-in-view: false
+
+---
+# ============================================================
+#  Perfil: oracle
+#  Activo cuando DB_ENGINE=oracle
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: oracle
+
+  datasource:
+    url: jdbc:oracle:thin:@//${DB_ORACLE_HOST}:${DB_ORACLE_PORT}/${DB_ORACLE_SERVICE}
+    username: ${DB_ORACLE_USERNAME}
+    password: ${DB_ORACLE_PASSWORD}
+    driver-class-name: oracle.jdbc.OracleDriver
+
+  jpa:
+    hibernate:
+      ddl-auto: ${DB_ORACLE_DDL_AUTO}
+    show-sql: ${DB_ORACLE_SHOW_SQL}
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: ec.gob.iess.transversal.FirmaIessApi.infrastructure.config.Oracle11gDialect
+        boot:
+          allow_jdbc_metadata_access: false
+    open-in-view: false
+
+---
+# ============================================================
+#  Perfil: mongo
+#  Activo cuando MONGO_ENABLED=true
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: mongo
+
+  data:
+    mongodb:
+      uri: mongodb://${DB_MONGO_USERNAME}:${DB_MONGO_PASSWORD}@${DB_MONGO_HOST}:${DB_MONGO_PORT}/auditoria_iess_db?authSource=${DB_MONGO_AUTH_DB}
+      database: auditoria_iess_db
+      auto-index-creation: true

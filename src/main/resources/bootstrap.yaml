@@ -1,0 +1,39 @@
+# ============================================================
+#  Bootstrap - Configuracion de Vault
+#  Se carga ANTES que application.yaml
+#  Vault provee las credenciales criticas al arrancar.
+#
+#  Autenticacion: USERPASS (usuario/clave) cuando VAULT_USERNAME
+#  esta definido; fallback a TOKEN si no lo esta.
+#
+#  Puerto: si VAULT_HOST es un dominio (contiene punto),
+#  no se concatena el puerto en la URI.
+#
+#  Con VAULT_ENABLED=false el proyecto arranca sin Vault
+#  usando los valores del .env como fallback.
+# ============================================================
+spring:
+  cloud:
+    vault:
+      enabled: ${VAULT_ENABLED:false}
+      host: ${VAULT_HOST:svc-vault}
+      port: ${VAULT_PORT:8200}
+      scheme: ${VAULT_SCHEME:http}
+      authentication: TOKEN
+      token: ${VAULT_TOKEN:none}
+
+      # userpass es manejado por VaultEnvironmentPostProcessor via REST
+
+      # KV v2
+      kv:
+        enabled: true
+        backend: ${VAULT_APP_NAME:base-spring-api}
+        default-context: ""
+        application-name: ""
+        profiles-path: ""
+
+      generic:
+        enabled: false
+
+  config:
+    import: "optional:configtree:/config/,optional:classpath:/,optional:file:./"
