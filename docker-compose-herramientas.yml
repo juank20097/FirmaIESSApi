@@ -1,24 +1,23 @@
 # ============================================================
-#  base-spring-api - Ecosistema de servicios utilitarios
-#  Autor: Juan Carlos Estévez Hidalgo
+#  transversal-firmaec-api - Ecosistema de servicios utilitarios
+#  Autor: Juan Carlos Estevez Hidalgo
 #  Fecha: 07 may 2026
 #
 #  Nombrado segun PAS-EST-059: servicios svc-, contenedores ctn-,
 #  redes net-, volumenes vol-, labels iess.* obligatorios.
 #
 #  Servicios incluidos:
-#    - PostgreSQL  → motor relacional principal (desarrollo local)
-#    - Oracle 19c  → motor relacional institucional (EXTERNO)
-#    - MongoDB     → auditoría
-#    - Vault       → gestión de secretos
-#    - vault-init  → carga automática de secretos (vault-init.sh)
-#    - MinIO       → almacenamiento de objetos (PDF)
+#    - PostgreSQL  -> motor relacional principal (desarrollo local)
+#    - MongoDB     -> auditoria
+#    - Vault       -> gestion de secretos
+#    - vault-init  -> carga automatica de secretos (vault-init.sh)
+#    - MinIO       -> almacenamiento de objetos (PDF)
 #
 #  Uso:
-#    Levantar todo:      docker-compose -f docker-compose-utilitarios.yml up -d
-#    Detener todo:       docker-compose -f docker-compose-utilitarios.yml down
-#    Ver logs:           docker-compose -f docker-compose-utilitarios.yml logs -f
-#    Recargar secretos:  docker-compose -f docker-compose-utilitarios.yml up vault-init
+#    Levantar todo:      docker-compose -f docker-compose-herramientas.yml up -d
+#    Detener todo:       docker-compose -f docker-compose-herramientas.yml down
+#    Ver logs:           docker-compose -f docker-compose-herramientas.yml logs -f
+#    Recargar secretos:  docker-compose -f docker-compose-herramientas.yml up svc-vault-init
 # ============================================================
 
 services:
@@ -29,7 +28,7 @@ services:
 #    container_name: ctn-postgres-iess
 #    restart: unless-stopped
 #    environment:
-#      POSTGRES_DB: base_spring_db
+#      POSTGRES_DB: transversal_firmaec_db
 #      POSTGRES_USER: postgres
 #      POSTGRES_PASSWORD: postgres
 #    ports:
@@ -40,45 +39,45 @@ services:
 #      - net-iess
 #    labels:
 #      iess.type: plataforma
-#      iess.project: base-spring-api
+#      iess.project: transversal-firmaec-api
 #      iess.business: DNTI
 #      iess.domain: transversal
 #      iess.version: "16"
 #      iess.environment: dev
 #    healthcheck:
-#      test: ["CMD-SHELL", "pg_isready -U postgres -d base_spring_db"]
+#      test: ["CMD-SHELL", "pg_isready -U postgres -d transversal_firmaec_db"]
 #      interval: 10s
 #      timeout: 5s
 #      retries: 5
 
   # ── MongoDB ──────────────────────────────────────────────────
-  svc-mongo-auditoria:
-    image: mongo:7-jammy
-    container_name: ctn-mongo-auditoria
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: mongo_user
-      MONGO_INITDB_ROOT_PASSWORD: mongo_password
-      MONGO_INITDB_DATABASE: auditoria_iess_db
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    command: mongod --quiet --logpath /dev/null
-    networks:
-      - net-iess
-    labels:
-      iess.type: plataforma
-      iess.project: transversal-firmaec-api
-      iess.business: DNTI
-      iess.domain: transversal
-      iess.version: "7"
-      iess.environment: dev
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+#  svc-mongo-auditoria:
+#    image: mongo:7-jammy
+#    container_name: ctn-mongo-auditoria
+#    restart: unless-stopped
+#    environment:
+#      MONGO_INITDB_ROOT_USERNAME: mongo_user
+#      MONGO_INITDB_ROOT_PASSWORD: mongo_password
+#      MONGO_INITDB_DATABASE: auditoria_iess_db
+#    ports:
+#      - "27017:27017"
+#    volumes:
+#      - mongo_data:/data/db
+#    command: mongod --quiet --logpath /dev/null
+#    networks:
+#      - net-iess
+#    labels:
+#      iess.type: plataforma
+#      iess.project: transversal-firmaec-api
+#      iess.business: DNTI
+#      iess.domain: transversal
+#      iess.version: "7"
+#      iess.environment: dev
+#    healthcheck:
+#      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
 
   # ── HashiCorp Vault ──────────────────────────────────────────
 #  svc-vault:
@@ -98,7 +97,7 @@ services:
 #      - net-iess
 #    labels:
 #      iess.type: plataforma
-#      iess.project: base-spring-api
+#      iess.project: transversal-firmaec-api
 #      iess.business: DNTI
 #      iess.domain: transversal
 #      iess.version: "1.15"
@@ -112,7 +111,7 @@ services:
   # ── Vault Init ───────────────────────────────────────────────
   # Ejecuta vault-init.sh al levantar el ecosistema.
   # Para modificar secretos editar vault-init.sh y reejecutar:
-  #   docker-compose -f docker-compose-utilitarios.yml up vault-init
+  #   docker-compose -f docker-compose-herramientas.yml up svc-vault-init
 #  svc-vault-init:
 #    image: hashicorp/vault:1.15
 #    container_name: ctn-vault-init
@@ -134,7 +133,7 @@ services:
   # ── MinIO ────────────────────────────────────────────────────
   svc-minio:
     image: minio/minio:RELEASE.2024-11-07T00-52-20Z
-    container_name: ctn-minio
+    container_name: ctn-minio-transversal-firmaec-api
     restart: unless-stopped
     environment:
       MINIO_ROOT_USER: minioadmin
@@ -164,14 +163,14 @@ services:
 networks:
   net-iess:
     external: true
-    name: net-iess
+    name: net-iess-transversal-firmaec-api-utils
     driver: bridge
 
-# ── Volúmenes persistentes ───────────────────────────────────
+# ── Volumenes persistentes ───────────────────────────────────
 volumes:
 #  postgres_data:
-#    name: vol-postgres-base-spring-api
-  mongo_data:
-    name: vol-mongo-transversal-firmaec-api
+#    name: vol-postgres-transversal-firmaec-api
+#  mongo_data:
+#    name: vol-mongo-transversal-firmaec-api
   minio_data:
     name: vol-minio-transversal-firmaec-api
