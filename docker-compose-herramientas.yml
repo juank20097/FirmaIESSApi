@@ -163,7 +163,7 @@ services:
 networks:
   net-iess:
     external: true
-    name: net-iess-transversal-firmaec-api-utils
+    name: net-iess
     driver: bridge
 
 # ── Volumenes persistentes ───────────────────────────────────
