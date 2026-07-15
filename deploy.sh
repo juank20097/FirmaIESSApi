@@ -486,7 +486,7 @@ log_step "PASO 8/12 — Obtención de la imagen"
 
 if [ "${DO_BUILD}" = true ]; then
     log_info "Construyendo imagen local ${IMAGE_TAG} desde Dockerfile..."
-    if ! dc_app build; then
+    if ! dc_app build --no-cache; then
         log_error "Fallo al construir la imagen ${IMAGE_TAG}."
         exit 1
     fi
