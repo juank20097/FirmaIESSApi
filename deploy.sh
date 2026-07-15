@@ -54,11 +54,11 @@ set -euo pipefail
 # =============================================================================
 # CONFIGURACIÓN — ajustar por proyecto
 # =============================================================================
-readonly PROJECT_NAME="base-spring-api"
+readonly PROJECT_NAME="transversal-firmaec-api"
 readonly COMPOSE_FILE="docker-compose.yml"
 readonly UTILS_COMPOSE_FILE="docker-compose-herramientas.yml"
 readonly ENV_FILE=".env"
-readonly SERVICE_NAME="svc-base-spring-api"
+readonly SERVICE_NAME="svc-transversal-firmaec-api"
 
 # ── Access token GitLab ──────────────────────────────────────────────────
 # Reemplazar con el personal access token de GitLab antes de ejecutar.
@@ -73,8 +73,8 @@ GITLAB_TOKEN=""
 # proyecto inferido, y entonces 'down --remove-orphans' de uno arrastra
 # contenedores del otro. Fijar -p evita esa ambiguedad sin importar desde
 # que ruta se invoque deploy.sh.
-readonly APP_PROJECT="base-spring-api-app"
-readonly UTILS_PROJECT="base-spring-api-utils"
+readonly APP_PROJECT="transversal-firmaec-api-app"
+readonly UTILS_PROJECT="transversal-firmaec-api-utils"
 
 # Wrappers para no repetir -p en cada invocacion de docker compose.
 dc_app()   { docker compose -p "${APP_PROJECT}" -f "${COMPOSE_FILE}" "$@"; }
@@ -89,11 +89,11 @@ readonly NETWORKS=(
 
 # Volúmenes nombrados por Docker (PAS-EST-059: prefijo vol-)
 readonly VOLUMES=(
-    "vol-base-spring-api-uploads"
+    "vol-transversal-firmaec-api-uploads"
 )
 
 # Imagen principal desplegada (para build local y rollback)
-readonly IMAGE_TAG="base-spring-api:1.0.0"
+readonly IMAGE_TAG="transversal-firmaec-api:2.0.0"
 # Si en el futuro se publica en Harbor, descomentar y ajustar:
 # readonly HARBOR_IMAGE="harbor.iess.gob.ec/dnti/transversal/base-spring-api:1.0.0"
 
@@ -363,11 +363,12 @@ log_ok "Red 'net-iess' disponible"
 # =============================================================================
 log_step "PASO 4/12 — Limpieza de artefactos residuales"
 
-if dc_app ps -q 2>/dev/null | grep -q .; then
+APP_CONTAINERS=$(dc_app ps -q 2>/dev/null || true)
+if [ -n "${APP_CONTAINERS}" ]; then
     log_info "Contenedores previos detectados. Deteniendo..."
 
     CURRENT_IMAGE="${IMAGE_TAG}"
-    RUNNING_CONTAINER=$(dc_app ps -q "${SERVICE_NAME}" 2>/dev/null | head -1)
+    RUNNING_CONTAINER=$(dc_app ps -q "${SERVICE_NAME}" 2>/dev/null | head -1 || true)
     if [ -n "${RUNNING_CONTAINER}" ]; then
         PREVIOUS_IMAGE=$(docker inspect --format='{{.Config.Image}}' "${RUNNING_CONTAINER}" 2>/dev/null || echo "")
         log_info "Imagen previa registrada para rollback: ${PREVIOUS_IMAGE:-ninguna}"
@@ -594,10 +595,9 @@ echo "  Estado de contenedores de la app:"
 dc_app ps
 echo ""
 log_ok "Despliegue de '${PROJECT_NAME}' completado exitosamente"
-log_info "API disponible en:        http://<IP_HOST>:8080/api"
-log_info "Swagger UI disponible en: http://<IP_HOST>:8080/api/swagger-ui.html"
-log_info "Health check:             http://<IP_HOST>:8080/api/actuator/health"
-log_info "Vault UI disponible en:   http://<IP_HOST>:8200"
+log_info "API disponible en:        http://<IP_HOST>:8090/api"
+log_info "Swagger UI disponible en: http://<IP_HOST>:8090/api/swagger-ui.html"
+log_info "Health check:             http://<IP_HOST>:8090/api/actuator/health"
 log_info "MinIO consola en:         http://<IP_HOST>:9001"
 echo ""
 echo "============================================================"
