@@ -63,7 +63,7 @@ readonly SERVICE_NAME="svc-transversal-firmaec-api"
 # ── Access token GitLab ──────────────────────────────────────────────────
 # Reemplazar con el personal access token de GitLab antes de ejecutar.
 # NO versionar este valor en Git (.gitignore ya excluye deploy.sh).
-GITLAB_TOKEN=""
+GITLAB_TOKEN="UbhDAZzjN-qWormnNggd"
 
 # Nombres de proyecto Compose fijos y EXPLICITOS.
 # Docker Compose v2 infiere el nombre de proyecto a partir del nombre del
@@ -289,6 +289,16 @@ fi
 # entre reinicios.
 # =============================================================================
 log_step "PASO 3/12 — Ecosistema de utilitarios (Vault / BD / Mongo / MinIO)"
+
+NETWORK_NAME="net-iess-transversal-firmaec-api-utils"
+
+if ! docker network inspect "${NETWORK_NAME}" >/dev/null 2>&1; then
+    echo "Creando red Docker ${NETWORK_NAME}..."
+    docker network create "${NETWORK_NAME}"
+    echo "Red creada correctamente"
+else
+    echo "La red ${NETWORK_NAME} ya existe"
+fi
 
 UTILS_RUNNING=$(dc_utils ps -q 2>/dev/null | wc -l | tr -d ' ' || true)
 UTILS_RUNNING="${UTILS_RUNNING:-0}"
