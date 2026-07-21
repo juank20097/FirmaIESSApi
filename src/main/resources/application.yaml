@@ -47,6 +47,7 @@ spring:
 minio:
   enabled: ${MINIO_ENABLED:false}
   url: ${MINIO_URL:http://localhost:9000}
+  public-url: ${MINIO_PUBLIC_URL:${minio.url}}
   access-key: ${MINIO_ACCESS_KEY:minioadmin}
   secret-key: ${MINIO_SECRET_KEY:minioadmin}
   bucket-default: ${MINIO_BUCKET_DEFAULT:base-spring-bucket}

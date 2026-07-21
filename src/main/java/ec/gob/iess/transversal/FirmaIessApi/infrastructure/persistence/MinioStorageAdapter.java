@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +39,14 @@ public class MinioStorageAdapter implements StoragePort {
 
     @Value("${minio.bucket-default}")
     private String bucket;
+
+    /**
+     * URL publica del servidor MinIO accesible desde el cliente externo.
+     * Puede diferir de minio.url (que usa el hostname interno de Docker).
+     * Ejemplo: http://192.168.12.42:9000
+     */
+    @Value("${minio.public-url:}")
+    private String minioPublicUrl;
 
     @Override
     public String almacenarBytes(byte[] bytes, String path, String contentType) {
@@ -114,15 +123,49 @@ public class MinioStorageAdapter implements StoragePort {
     @Override
     public String generarUrlPresignada(String path, int horasExpiracion) {
         try {
-            return minioClient.getPresignedObjectUrl(
+            String url = minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
                             .bucket(bucket)
                             .object(path)
                             .expiry(horasExpiracion, TimeUnit.HOURS)
                             .build());
+            return reemplazarHostPublico(url);
         } catch (Exception e) {
             throw new RuntimeException("Error al generar URL presignada para: " + path, e);
+        }
+    }
+
+    /**
+     * Reemplaza el scheme+host+port interno de Docker (svc-minio) por la URL
+     * publica del servidor configurada en minio.public-url.
+     * Si public-url no esta configurada o es igual al endpoint interno, devuelve
+     * la URL sin modificar.
+     */
+    private String reemplazarHostPublico(String urlPresignada) {
+        if (minioPublicUrl == null || minioPublicUrl.isBlank()) {
+            return urlPresignada;
+        }
+        try {
+            URI presignada = URI.create(urlPresignada);
+            URI publica   = URI.create(minioPublicUrl);
+
+            String hostInternoNorm = presignada.getScheme() + "://" + presignada.getHost()
+                    + (presignada.getPort() != -1 ? ":" + presignada.getPort() : "");
+            String hostPublicoNorm = publica.getScheme() + "://" + publica.getHost()
+                    + (publica.getPort() != -1 ? ":" + publica.getPort() : "");
+
+            if (hostInternoNorm.equalsIgnoreCase(hostPublicoNorm)) {
+                return urlPresignada;
+            }
+
+            String resultado = urlPresignada.replaceFirst(
+                    java.util.regex.Pattern.quote(hostInternoNorm), hostPublicoNorm);
+            log.debug("MinIO URL reemplazada: {} -> {}", hostInternoNorm, hostPublicoNorm);
+            return resultado;
+        } catch (Exception e) {
+            log.warn("No se pudo reemplazar el host publico en la URL presignada: {}", e.getMessage());
+            return urlPresignada;
         }
     }
 
