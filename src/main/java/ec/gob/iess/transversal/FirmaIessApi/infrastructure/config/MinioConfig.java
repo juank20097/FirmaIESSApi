@@ -40,6 +40,10 @@ public class MinioConfig {
     @Value("${minio.url}")
     private String url;
 
+    /** URL publica del servidor MinIO, usada para firmar URLs de descarga. */
+    @Value("${minio.public-url}")
+    private String publicUrl;
+
     /** Clave de acceso (access key) de MinIO. */
     @Value("${minio.access-key}")
     private String accessKey;
@@ -76,6 +80,27 @@ public class MinioConfig {
         crearBucketSiNoExiste(client);
 
         return client;
+    }
+
+    /**
+     * <b> Crea un cliente MinIO configurado con la URL publica del servidor,
+     * usado exclusivamente para generar URLs presignadas de descarga. </b>
+     *
+     * @return instancia de MinioClient apuntando a la URL publica
+     */
+    @Bean("publicMinioClient")
+    public MinioClient publicMinioClient() {
+        OkHttpClient httpClient = new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
+
+        return MinioClient.builder()
+                .endpoint(publicUrl)
+                .credentials(accessKey, secretKey)
+                .httpClient(httpClient)
+                .build();
     }
 
     /**
