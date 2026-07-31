@@ -69,3 +69,7 @@ Thumbs.db
 
 # ── HELP generado por Spring Initializr ──────────────────────
 HELP.md
+
+# ── Herramientas de asistentes IA (locales) ──────────────────
+.claudeignore
+.clinerules
