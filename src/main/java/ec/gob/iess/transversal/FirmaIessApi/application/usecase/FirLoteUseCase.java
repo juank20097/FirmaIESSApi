@@ -165,6 +165,7 @@ public class FirLoteUseCase {
 
     private String obtenerToken(FirmarLoteRequest request, String sistema, String apiKey) {
         String url = firmadigitalUrl + "/servicio/documentos";
+        log.info("FirLoteUseCase: llamando obtenerToken -> POST {}", url);
         StringBuilder docsJson = new StringBuilder("[");
         List<FirmarDocumentoItem> docs = request.getDocumentos();
         for (int i = 0; i < docs.size(); i++) {
@@ -177,12 +178,19 @@ public class FirLoteUseCase {
         String body = "{\"cedula\":\"" + request.getCedula() + "\","
                 + "\"sistema\":\"" + sistema + "\","
                 + "\"documentos\":" + docsJson + "}";
+        log.info("FirLoteUseCase: body tokenJwt (sin documentos base64): cedula={}, sistema={}, docs={}",
+                request.getCedula(), sistema, docs.stream().map(FirmarDocumentoItem::getNombre).toList());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("X-API-KEY", apiKey);
-        String respuesta = restTemplate.postForObject(url, new HttpEntity<>(body, headers), String.class);
-        log.debug("FirLoteUseCase: respuesta tokenJwt: {}", respuesta);
-        return respuesta;
+        try {
+            String respuesta = restTemplate.postForObject(url, new HttpEntity<>(body, headers), String.class);
+            log.info("FirLoteUseCase: tokenJwt obtenido OK (longitud={})", respuesta != null ? respuesta.length() : 0);
+            return respuesta;
+        } catch (Exception e) {
+            log.error("FirLoteUseCase: fallo en POST {} — {}", url, e.getMessage());
+            throw e;
+        }
     }
 
     private String llamarFirmarTransversal(String pkcs12, String password,
