@@ -22,7 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/iess/seguridad")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = {"http://192.168.*.*:*", "https://192.168.*.*:*"})
 @ConditionalOnProperty(name = "rsa.enabled", havingValue = "true")
 public class SeguridadController {
 
@@ -33,7 +33,7 @@ public class SeguridadController {
      * GET /api/iess/seguridad/clave-publica
      */
     @GetMapping("/clave-publica")
-    public ResponseEntity<?> obtenerClavePublica() {
+    public ResponseEntity<Map<String, String>> obtenerClavePublica() {
         log.info("SeguridadController: clave publica solicitada");
         return ResponseEntity.ok(Map.of(
             "clavePublica", encryptionService.getPublicKeyBase64(),

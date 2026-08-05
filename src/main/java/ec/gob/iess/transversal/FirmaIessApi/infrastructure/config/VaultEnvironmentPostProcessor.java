@@ -39,6 +39,13 @@ import java.util.Map;
 @Slf4j
 public class VaultEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
+    private static final String DB_ENGINE_POSTGRES = "postgres";
+    private static final String KEY_USERNAME = "username";
+    private static final String KEY_PASSWORD = "password";
+    private static final String DEFAULT_LOCALHOST = "localhost";
+    private static final String PROP_RSA_PUBLIC_KEY = "RSA_PUBLIC_KEY";
+    private static final String PROP_RSA_PRIVATE_KEY = "RSA_PRIVATE_KEY";
+
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment,
                                        SpringApplication application) {
@@ -55,7 +62,7 @@ public class VaultEnvironmentPostProcessor implements EnvironmentPostProcessor {
         String vaultPassword = environment.getProperty("VAULT_PASSWORD", "");
         String vaultToken    = environment.getProperty("VAULT_TOKEN", "");
         String vaultAppName  = environment.getProperty("VAULT_APP_NAME", "base-spring-api");
-        String dbEngine      = environment.getProperty("DB_ENGINE", "postgres");
+        String dbEngine      = environment.getProperty("DB_ENGINE", DB_ENGINE_POSTGRES);
         String rsaSwitch     = environment.getProperty("RSA_ENABLED", "false");
         String basePath      = "secret/data/iess/apps/transversal/" + vaultAppName;
 
@@ -84,29 +91,29 @@ public class VaultEnvironmentPostProcessor implements EnvironmentPostProcessor {
             Map<String, Object> secretos = new HashMap<>();
 
             // ── PostgreSQL ──────────────────────────────────────────
-            if ("postgres".equalsIgnoreCase(dbEngine)) {
+            if (DB_ENGINE_POSTGRES.equalsIgnoreCase(dbEngine)) {
                 leerSecreto(vaultTemplate, basePath + "/db/postgres",
                         Map.of("host","DB_POSTGRES_HOST","port","DB_POSTGRES_PORT",
-                               "username","DB_POSTGRES_USERNAME","password","DB_POSTGRES_PASSWORD",
+                               KEY_USERNAME,"DB_POSTGRES_USERNAME",KEY_PASSWORD,"DB_POSTGRES_PASSWORD",
                                "bdd","DB_POSTGRES_NAME"), secretos);
 
                 secretos.put("spring.datasource.url",
-                        "jdbc:postgresql://" + val(secretos,"DB_POSTGRES_HOST","localhost") + ":" +
+                        "jdbc:postgresql://" + val(secretos,"DB_POSTGRES_HOST",DEFAULT_LOCALHOST) + ":" +
                         val(secretos,"DB_POSTGRES_PORT","5432") + "/" +
                         val(secretos,"DB_POSTGRES_NAME","base_spring_db"));
-                secretos.put("spring.datasource.username", val(secretos,"DB_POSTGRES_USERNAME","postgres"));
-                secretos.put("spring.datasource.password", val(secretos,"DB_POSTGRES_PASSWORD","postgres"));
+                secretos.put("spring.datasource.username", val(secretos,"DB_POSTGRES_USERNAME",DB_ENGINE_POSTGRES));
+                secretos.put("spring.datasource.password", val(secretos,"DB_POSTGRES_PASSWORD",DB_ENGINE_POSTGRES));
             }
 
             // ── Oracle ──────────────────────────────────────────────
             if ("oracle".equalsIgnoreCase(dbEngine)) {
                 leerSecreto(vaultTemplate, basePath + "/db/oracle",
                         Map.of("host","DB_ORACLE_HOST","port","DB_ORACLE_PORT",
-                               "username","DB_ORACLE_USERNAME","password","DB_ORACLE_PASSWORD",
+                               KEY_USERNAME,"DB_ORACLE_USERNAME",KEY_PASSWORD,"DB_ORACLE_PASSWORD",
                                "service","DB_ORACLE_SERVICE"), secretos);
 
                 secretos.put("spring.datasource.url",
-                        "jdbc:oracle:thin:@//" + val(secretos,"DB_ORACLE_HOST","localhost") + ":" +
+                        "jdbc:oracle:thin:@//" + val(secretos,"DB_ORACLE_HOST",DEFAULT_LOCALHOST) + ":" +
                         val(secretos,"DB_ORACLE_PORT","1521") + "/" +
                         val(secretos,"DB_ORACLE_SERVICE","ORCLPDB1"));
                 secretos.put("spring.datasource.username", val(secretos,"DB_ORACLE_USERNAME","oracle_user"));
@@ -116,13 +123,13 @@ public class VaultEnvironmentPostProcessor implements EnvironmentPostProcessor {
             // ── MongoDB ─────────────────────────────────────────────
             leerSecreto(vaultTemplate, basePath + "/db/mongo",
                     Map.of("host","DB_MONGO_HOST","port","DB_MONGO_PORT","bdd","DB_MONGO_NAME",
-                           "username","DB_MONGO_USERNAME","password","DB_MONGO_PASSWORD",
+                           KEY_USERNAME,"DB_MONGO_USERNAME",KEY_PASSWORD,"DB_MONGO_PASSWORD",
                            "auth_db","DB_MONGO_AUTH_DB"), secretos);
 
             secretos.put("spring.data.mongodb.uri",
                     "mongodb://" + val(secretos,"DB_MONGO_USERNAME","mongo_user") + ":" +
                     val(secretos,"DB_MONGO_PASSWORD","mongo_password") + "@" +
-                    val(secretos,"DB_MONGO_HOST","localhost") + ":" +
+                    val(secretos,"DB_MONGO_HOST",DEFAULT_LOCALHOST) + ":" +
                     val(secretos,"DB_MONGO_PORT","27017") +
                     "/auditoria_iess_db?authSource=" + val(secretos,"DB_MONGO_AUTH_DB","admin"));
 
@@ -137,11 +144,11 @@ public class VaultEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
             // ── RSA ──────────────────────────────────────────────────
             leerSecreto(vaultTemplate, basePath + "/rsa",
-                    Map.of("publicKey","RSA_PUBLIC_KEY","privateKey","RSA_PRIVATE_KEY"), secretos);
+                    Map.of("publicKey",PROP_RSA_PUBLIC_KEY,"privateKey",PROP_RSA_PRIVATE_KEY), secretos);
 
             secretos.put("rsa.enabled", rsaSwitch);
-            if (secretos.containsKey("RSA_PUBLIC_KEY"))  secretos.put("rsa.public-key",  secretos.get("RSA_PUBLIC_KEY"));
-            if (secretos.containsKey("RSA_PRIVATE_KEY")) secretos.put("rsa.private-key", secretos.get("RSA_PRIVATE_KEY"));
+            if (secretos.containsKey(PROP_RSA_PUBLIC_KEY))  secretos.put("rsa.public-key",  secretos.get(PROP_RSA_PUBLIC_KEY));
+            if (secretos.containsKey(PROP_RSA_PRIVATE_KEY)) secretos.put("rsa.private-key", secretos.get(PROP_RSA_PRIVATE_KEY));
 
             environment.getPropertySources().addFirst(new MapPropertySource("vault-secrets", secretos));
             log.info("Vault: {} propiedades cargadas exitosamente.", secretos.size());
@@ -160,7 +167,7 @@ public class VaultEnvironmentPostProcessor implements EnvironmentPostProcessor {
         try {
             String loginUrl = baseUrl + "/v1/auth/userpass/login/" + username;
             RestTemplate rest = new RestTemplate();
-            Map<String, String> body = Map.of("password", password);
+            Map<String, String> body = Map.of(KEY_PASSWORD, password);
             Map<String, Object> response = rest.postForObject(loginUrl, body, Map.class);
             if (response != null && response.containsKey("auth")) {
                 Map<String, Object> auth = (Map<String, Object>) response.get("auth");

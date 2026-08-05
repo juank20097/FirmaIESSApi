@@ -29,6 +29,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EnlacesLoteUseCase {
 
+    private static final String ESTADO_ERROR = "ERROR";
+
     private final StoragePort storagePort;
 
     @Value("${firmadigital.url-expiracion-horas:24}")
@@ -42,7 +44,7 @@ public class EnlacesLoteUseCase {
             List<String> objetos = storagePort.listarObjetos(prefijo);
 
             if (objetos.isEmpty()) {
-                return EnlacesResponse.builder().idLote(idLote).estado("ERROR")
+                return EnlacesResponse.builder().idLote(idLote).estado(ESTADO_ERROR)
                         .mensaje("No se encontraron documentos para el lote: " + idLote
                                 + ". Verifique el idLote o que la firma haya completado.")
                         .enlaces(List.of()).build();
@@ -52,7 +54,7 @@ public class EnlacesLoteUseCase {
             List<String> zips = objetos.stream().filter(o -> o.endsWith(".zip")).toList();
 
             if (pdfs.size() > 1 && zips.isEmpty()) {
-                return EnlacesResponse.builder().idLote(idLote).estado("ERROR")
+                return EnlacesResponse.builder().idLote(idLote).estado(ESTADO_ERROR)
                         .mensaje("Hay " + pdfs.size() + " documentos sin empaquetar. "
                                 + "Llame primero a POST /iess/firmaec/empaquetar/" + idLote)
                         .enlaces(List.of()).build();
@@ -85,7 +87,7 @@ public class EnlacesLoteUseCase {
 
         } catch (Exception e) {
             log.error("EnlacesLoteUseCase: error al generar enlaces para lote {}: {}", idLote, e.getMessage());
-            return EnlacesResponse.builder().idLote(idLote).estado("ERROR")
+            return EnlacesResponse.builder().idLote(idLote).estado(ESTADO_ERROR)
                     .mensaje("Error al generar enlaces: " + e.getMessage())
                     .enlaces(List.of()).build();
         }

@@ -54,6 +54,9 @@ public class FirLoteUseCase {
     /** Intentos maximos de polling. */
     private static final int MAX_INTENTOS = 10;
 
+    /** Estado de respuesta para errores. */
+    private static final String ESTADO_ERROR = "ERROR";
+
     private final FirDocfirmadoJpaRepository firmadosRepo;
     private final RestTemplate restTemplate;
     private final LoteContextHolder loteContextHolder;
@@ -89,11 +92,11 @@ public class FirLoteUseCase {
 
         // Validaciones basicas
         if (request.getDocumentos() == null || request.getDocumentos().isEmpty()) {
-            return buildResponse(request, 0, 0, "Debe enviar al menos un documento.", "ERROR");
+            return buildResponse(request, 0, 0, "Debe enviar al menos un documento.", ESTADO_ERROR);
         }
         if (request.getDocumentos().size() > maxDocumentos) {
             return buildResponse(request, request.getDocumentos().size(), 0,
-                    "Maximo " + maxDocumentos + " documentos por bloque.", "ERROR");
+                    "Maximo " + maxDocumentos + " documentos por bloque.", ESTADO_ERROR);
         }
 
         // -- Desencriptar payload si viene cifrado -----------------------
@@ -109,7 +112,7 @@ public class FirLoteUseCase {
                 log.debug("FirLoteUseCase: payload cifrado desencriptado correctamente para lote {}", request.getIdLote());
             } catch (Exception e) {
                 log.error("FirLoteUseCase: error al desencriptar payload: {}", e.getMessage());
-                return buildResponse(request, 0, 0, "Error al desencriptar el payload: " + e.getMessage(), "ERROR");
+                return buildResponse(request, 0, 0, "Error al desencriptar el payload: " + e.getMessage(), ESTADO_ERROR);
             }
         }
 
@@ -137,7 +140,14 @@ public class FirLoteUseCase {
             int firmados = esperarDocumentosFirmados(request.getCedula(), nombresEsperados, fechaInicio);
 
             int errores = request.getDocumentos().size() - firmados;
-            String estado = errores == 0 ? "OK" : firmados == 0 ? "ERROR" : "PARCIAL";
+            String estado;
+            if (errores == 0) {
+                estado = "OK";
+            } else if (firmados == 0) {
+                estado = ESTADO_ERROR;
+            } else {
+                estado = "PARCIAL";
+            }
             String mensaje;
             if (firmados > 0) {
                 mensaje = firmados + " documento(s) firmado(s) exitosamente.";
@@ -151,11 +161,17 @@ public class FirLoteUseCase {
 
             return buildResponse(request, request.getDocumentos().size(), firmados, mensaje, estado);
 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("FirLoteUseCase: polling interrumpido para lote {}: {}", request.getIdLote(), e.getMessage());
+            loteContextHolder.limpiar(request.getCedula());
+            return buildResponse(request, request.getDocumentos().size(), 0,
+                    "Proceso interrumpido: " + e.getMessage(), ESTADO_ERROR);
         } catch (Exception e) {
             log.error("FirLoteUseCase: error en lote {}: {}", request.getIdLote(), e.getMessage());
             loteContextHolder.limpiar(request.getCedula());
             return buildResponse(request, request.getDocumentos().size(), 0,
-                    "Error inesperado: " + e.getMessage(), "ERROR");
+                    "Error inesperado: " + e.getMessage(), ESTADO_ERROR);
         }
     }
 

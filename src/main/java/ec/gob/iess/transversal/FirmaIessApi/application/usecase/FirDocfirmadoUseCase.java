@@ -34,11 +34,15 @@ public class FirDocfirmadoUseCase {
     @Transactional
     public FirDocfirmado crear(FirDocfirmado documento) {
         String idLote = loteContextHolder.obtener(documento.getCedula());
-        return crear(documento, idLote);
+        return crearInterno(documento, idLote);
     }
 
     @Transactional
     public FirDocfirmado crear(FirDocfirmado documento, String idLote) {
+        return crearInterno(documento, idLote);
+    }
+
+    private FirDocfirmado crearInterno(FirDocfirmado documento, String idLote) {
         documento.setStatus("A");
         FirDocfirmado guardado = mapper.toDomain(repository.save(mapper.toEntity(documento)));
 

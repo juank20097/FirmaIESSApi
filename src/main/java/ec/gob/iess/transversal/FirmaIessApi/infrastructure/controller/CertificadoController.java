@@ -16,7 +16,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/iess/movil")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = {"http://192.168.*.*:*", "https://192.168.*.*:*"})
 public class CertificadoController {
 
     private final CertificadoJpaRepository certificadoRepo;
@@ -26,7 +26,7 @@ public class CertificadoController {
      * GET /api/iess/movil/certificado/{sistema}
      */
     @GetMapping("/certificado/{sistema}")
-    public ResponseEntity<?> obtenerCertificado(@PathVariable String sistema) {
+    public ResponseEntity<Map<String, String>> obtenerCertificado(@PathVariable String sistema) {
         return certificadoRepo.findBySistema(sistema)
             .map(cert -> ResponseEntity.ok(Map.of(
                 "cedula",      cert.getCedula(),

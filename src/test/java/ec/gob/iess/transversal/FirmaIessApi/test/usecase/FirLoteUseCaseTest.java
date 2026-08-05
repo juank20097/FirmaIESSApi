@@ -266,6 +266,45 @@ class FirLoteUseCaseTest {
         verify(loteContextHolder).limpiar("1003422365");
     }
 
+    @Test
+    @DisplayName("firmar: usa parametros por defecto cuando el request no trae parametros")
+    void firmar_sinParametros_usaValoresPorDefecto() throws Exception {
+        FirmarLoteRequest req = FirmarLoteRequest.builder()
+                .idLote("lote_001").cedula("1003422365")
+                .pkcs12("pkcs12real").password("passreal")
+                .documentos(List.of(doc("doc1.pdf")))
+                .parametros(null).build();
+
+        when(restTemplate.postForObject(contains("/servicio/documentos"), any(), eq(String.class)))
+                .thenReturn("tokenJwt");
+        when(restTemplate.postForObject(contains("/appfirmardocumentotransversal"), any(), eq(String.class)))
+                .thenReturn(null);
+        when(firmadosRepo.findByCedulaAndNombreDocumentoInAndCreatedAtAfter(any(), any(), any()))
+                .thenReturn(List.of(entity()));
+
+        FirmarLoteResponse resp = useCase.firmar(req);
+
+        assertThat(resp.getEstado()).isEqualTo("OK");
+    }
+
+    @Test
+    @DisplayName("firmar: incluye el mensaje de WildFly cuando ningun documento se firma y hay respuesta")
+    void firmar_ningunDocFirmadoConRespuestaWildFly_incluyeMensajeWildFly() throws Exception {
+        FirmarLoteRequest req = requestSinCifrado(List.of(doc("doc1.pdf")));
+
+        when(restTemplate.postForObject(contains("/servicio/documentos"), any(), eq(String.class)))
+                .thenReturn("tokenJwt");
+        when(restTemplate.postForObject(contains("/appfirmardocumentotransversal"), any(), eq(String.class)))
+                .thenReturn("codigo de error retornado por wildfly");
+        when(firmadosRepo.findByCedulaAndNombreDocumentoInAndCreatedAtAfter(any(), any(), any()))
+                .thenReturn(List.of());
+
+        FirmarLoteResponse resp = useCase.firmar(req);
+
+        assertThat(resp.getEstado()).isEqualTo("ERROR");
+        assertThat(resp.getMensaje()).contains("Error en WildFly");
+    }
+
     // ── HELPERS ───────────────────────────────────────────────────────────────
 
     private FirmarDocumentoItem doc(String nombre) {

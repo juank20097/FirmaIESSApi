@@ -26,6 +26,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ApplicationStartupLogger {
 
+    private static final String HABILITADO_INTERNO = "Habilitado/Interno";
+    private static final String HABILITADO_EXTERNO = "Habilitado/Externo";
+
     // --- Servidor --------------------------------------------
     @Value("${server.port:8080}")
     private String serverPort;
@@ -142,11 +145,11 @@ public class ApplicationStartupLogger {
         if ("oracle".equalsIgnoreCase(dbEngine)) {
             String detalle = oracleHost + ":" + oraclePort + "/" + oracleService;
             boolean esLocal = esLocal(oracleHost);
-            return "BD Relacional : ORACLE    | " + (esLocal ? "Habilitado/Interno" : "Habilitado/Externo") + "  | " + detalle;
+            return "BD Relacional : ORACLE    | " + (esLocal ? HABILITADO_INTERNO : HABILITADO_EXTERNO) + "  | " + detalle;
         } else {
             String detalle = postgresHost + ":" + postgresPort + "/" + postgresName;
             boolean esLocal = esLocal(postgresHost);
-            return "BD Relacional : POSTGRES  | " + (esLocal ? "Habilitado/Interno" : "Habilitado/Externo") + "  | " + detalle;
+            return "BD Relacional : POSTGRES  | " + (esLocal ? HABILITADO_INTERNO : HABILITADO_EXTERNO) + "  | " + detalle;
         }
     }
 
@@ -163,7 +166,7 @@ public class ApplicationStartupLogger {
     private String resolverLineaServicio(String etiqueta, boolean habilitado, String host, String puerto, String nombre) {
         if (!habilitado) return etiqueta + ": Deshabilitado";
         String detalle = host + ":" + puerto + (nombre != null ? "/" + nombre : "");
-        return etiqueta + ": " + (esLocal(host) ? "Habilitado/Interno" : "Habilitado/Externo") + "  | " + detalle;
+        return etiqueta + ": " + (esLocal(host) ? HABILITADO_INTERNO : HABILITADO_EXTERNO) + "  | " + detalle;
     }
 
     /**
@@ -176,7 +179,7 @@ public class ApplicationStartupLogger {
             return "MinIO        : Deshabilitado  | Storage: Disco local (" + localStoragePath + "/)";
         }
         String host = extraerHost(minioUrl);
-        String estado = esLocal(host) ? "Habilitado/Interno" : "Habilitado/Externo";
+        String estado = esLocal(host) ? HABILITADO_INTERNO : HABILITADO_EXTERNO;
         return "MinIO        : " + estado + "  | " + minioUrl + " | Bucket: " + minioBucket;
     }
 

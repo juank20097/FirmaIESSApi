@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/iess/firmaec")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = {"http://192.168.*.*:*", "https://192.168.*.*:*"})
 public class FirDocfirmadoController {
 
     private final FirDocfirmadoUseCase useCase;

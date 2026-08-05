@@ -4,7 +4,7 @@
  */
 package ec.gob.iess.transversal.FirmaIessApi.infrastructure.config;
 
-import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.cfg.JdbcSettings;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,7 +39,7 @@ public class Oracle11gConfig {
     @Bean
     public HibernatePropertiesCustomizer oracle11gInspectorCustomizer() {
         return hibernateProperties -> hibernateProperties.put(
-                AvailableSettings.STATEMENT_INSPECTOR,
+                JdbcSettings.STATEMENT_INSPECTOR,
                 new Oracle11gStatementInspector()
         );
     }

@@ -77,10 +77,12 @@ public class LocalStorageAdapter implements StoragePort {
         try {
             Path base = Paths.get(uploadPath).toAbsolutePath().normalize().resolve(prefijo);
             if (!Files.exists(base)) return List.of();
-            return Files.walk(base)
-                    .filter(Files::isRegularFile)
-                    .map(p -> Paths.get(uploadPath).toAbsolutePath().normalize().relativize(p).toString())
-                    .collect(Collectors.toList());
+            try (java.util.stream.Stream<Path> stream = Files.walk(base)) {
+                return stream
+                        .filter(Files::isRegularFile)
+                        .map(p -> Paths.get(uploadPath).toAbsolutePath().normalize().relativize(p).toString())
+                        .collect(Collectors.toList());
+            }
         } catch (IOException e) {
             throw new RuntimeException("Error al listar objetos locales con prefijo: " + prefijo, e);
         }
