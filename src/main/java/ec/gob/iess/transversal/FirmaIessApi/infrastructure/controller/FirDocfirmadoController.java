@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/iess/firmaec")
+@RequestMapping("/firmaec")
 @RequiredArgsConstructor
 @CrossOrigin(originPatterns = {"http://192.168.*.*:*", "https://192.168.*.*:*"})
 public class FirDocfirmadoController {

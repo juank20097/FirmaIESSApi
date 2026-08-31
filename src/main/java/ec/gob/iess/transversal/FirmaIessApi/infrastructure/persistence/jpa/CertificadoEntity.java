@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "certificados", schema = "iess")
+@Table(name = "certificados")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

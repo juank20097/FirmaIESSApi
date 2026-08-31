@@ -20,30 +20,21 @@
 
 services:
 
-  svc-transversal-firmaec-api:
+  firmaiess-api:
     build:
       context: .
       dockerfile: Dockerfile
-    image: transversal-firmaec-api:2.0.0
-    container_name: ctn-transversal-firmaec-api
+    image: firmaiess-api:2.0.0
+    container_name: firmaiess-api
     restart: unless-stopped
     env_file:
       - .env
-    environment:
-      SPRING_PROFILES_ACTIVE: postgres,mongo
     ports:
-      - "8090:8090"
+      - "8091:8090"
     volumes:
       - app_uploads:/app/uploads
     networks:
-      - net-iess
-    labels:
-      iess.type: app
-      iess.project: transversal-firmaec-api
-      iess.business: DNTI
-      iess.domain: transversal
-      iess.version: "2.0.0"
-      iess.environment: dev
+      - net
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8090/api/actuator/health"]
       interval: 15s
@@ -51,13 +42,12 @@ services:
       retries: 5
       start_period: 30s
 
-# ── Red compartida con utilitarios ───────────────────────────
+# ── Red compartida del stack HomeServer ──────────────────────
 networks:
-  net-iess:
+  net:
     external: true
-    name: net-iess
 
 # ── Volumenes persistentes ───────────────────────────────────
 volumes:
   app_uploads:
-    name: vol-transversal-firmaec-api-uploads
+    name: vol-firmaiess-api-uploads

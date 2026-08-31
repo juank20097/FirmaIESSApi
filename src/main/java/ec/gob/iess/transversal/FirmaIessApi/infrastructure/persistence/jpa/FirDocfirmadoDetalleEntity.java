@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "FIR_DOCFIRMADOSDET_T", schema = "FIRMAEC")
+@Table(name = "FIR_DOCFIRMADOSDET_T")
 @EntityListeners(AuditingEntityListener.class)
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class FirDocfirmadoDetalleEntity {

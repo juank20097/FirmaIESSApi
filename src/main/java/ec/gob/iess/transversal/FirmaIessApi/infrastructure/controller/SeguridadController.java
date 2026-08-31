@@ -20,7 +20,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/iess/seguridad")
+@RequestMapping("/seguridad")
 @RequiredArgsConstructor
 @CrossOrigin(originPatterns = {"http://192.168.*.*:*", "https://192.168.*.*:*"})
 @ConditionalOnProperty(name = "rsa.enabled", havingValue = "true")
