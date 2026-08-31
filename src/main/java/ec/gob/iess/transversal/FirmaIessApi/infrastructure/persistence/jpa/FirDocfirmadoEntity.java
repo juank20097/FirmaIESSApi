@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "FIR_DOCFIRMADOS_T")
+@Table(name = "FIR_DOCFIRMADOS_T", schema = "FIRMAEC")
 @EntityListeners(AuditingEntityListener.class)
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class FirDocfirmadoEntity {

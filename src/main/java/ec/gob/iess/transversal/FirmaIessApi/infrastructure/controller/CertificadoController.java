@@ -14,7 +14,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/movil")
+@RequestMapping("/iess/movil")
 @RequiredArgsConstructor
 @CrossOrigin(originPatterns = {"http://192.168.*.*:*", "https://192.168.*.*:*"})
 public class CertificadoController {

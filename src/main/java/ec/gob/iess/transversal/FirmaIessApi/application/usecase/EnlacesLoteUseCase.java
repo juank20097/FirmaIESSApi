@@ -56,7 +56,7 @@ public class EnlacesLoteUseCase {
             if (pdfs.size() > 1 && zips.isEmpty()) {
                 return EnlacesResponse.builder().idLote(idLote).estado(ESTADO_ERROR)
                         .mensaje("Hay " + pdfs.size() + " documentos sin empaquetar. "
-                                + "Llame primero a POST /firmaec/empaquetar/" + idLote)
+                                + "Llame primero a POST /iess/firmaec/empaquetar/" + idLote)
                         .enlaces(List.of()).build();
             }
 
