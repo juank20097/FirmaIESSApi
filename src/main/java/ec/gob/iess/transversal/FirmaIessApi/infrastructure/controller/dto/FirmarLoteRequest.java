@@ -50,6 +50,16 @@ public class FirmarLoteRequest {
      */
     private String claveAesCifrada;
 
+    // -- Modo por sistema registrado (certificado guardado en BD) ----------
+
+    /**
+     * Nombre del sistema con certificado pre-registrado en la tabla
+     * certificados (ver CertificadoEntity). Si viene presente y pkcs12/
+     * pkcs12Cifrado estan vacios, el certificado y la cedula se resuelven
+     * del lado del servidor -- el cliente nunca ve el .p12 ni la password.
+     */
+    private String certificadoSistema;
+
     /** Lista de documentos a firmar. Maximo 10 por llamada. */
     private List<FirmarDocumentoItem> documentos;
 

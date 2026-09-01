@@ -58,6 +58,7 @@ public class FirLoteUseCase {
     private static final String ESTADO_ERROR = "ERROR";
 
     private final FirDocfirmadoJpaRepository firmadosRepo;
+    private final ec.gob.iess.transversal.FirmaIessApi.infrastructure.persistence.jpa.CertificadoJpaRepository certificadoRepo;
     private final RestTemplate restTemplate;
     private final LoteContextHolder loteContextHolder;
     private final HybridEncryptionService encryptionService;
@@ -97,6 +98,24 @@ public class FirLoteUseCase {
         if (request.getDocumentos().size() > maxDocumentos) {
             return buildResponse(request, request.getDocumentos().size(), 0,
                     "Maximo " + maxDocumentos + " documentos por bloque.", ESTADO_ERROR);
+        }
+
+        // -- Resolver certificado por sistema registrado (nunca viaja al cliente) --
+        if ((request.getPkcs12() == null || request.getPkcs12().isBlank())
+                && !request.esCifrado()
+                && request.getCertificadoSistema() != null
+                && !request.getCertificadoSistema().isBlank()) {
+            var certificado = certificadoRepo.findBySistema(request.getCertificadoSistema())
+                    .orElse(null);
+            if (certificado == null) {
+                return buildResponse(request, request.getDocumentos().size(), 0,
+                        "No se encontro certificado registrado para el sistema: " + request.getCertificadoSistema(),
+                        ESTADO_ERROR);
+            }
+            request.setCedula(certificado.getCedula());
+            request.setPkcs12(certificado.getCertificado());
+            request.setPassword(Base64.getEncoder()
+                    .encodeToString(certificado.getPassword().getBytes(java.nio.charset.StandardCharsets.UTF_8)));
         }
 
         // -- Desencriptar payload si viene cifrado -----------------------

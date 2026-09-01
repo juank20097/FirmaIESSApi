@@ -86,7 +86,7 @@ public class EnlacesLoteUseCase {
                     .enlaces(enlaces).build();
 
         } catch (Exception e) {
-            log.error("EnlacesLoteUseCase: error al generar enlaces para lote {}: {}", idLote, e.getMessage());
+            log.error("EnlacesLoteUseCase: error al generar enlaces para lote {}: {}", idLote, e.getMessage(), e);
             return EnlacesResponse.builder().idLote(idLote).estado(ESTADO_ERROR)
                     .mensaje("Error al generar enlaces: " + e.getMessage())
                     .enlaces(List.of()).build();
